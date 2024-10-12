@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facebook-like News Feed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    #newsFeed {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow-y: scroll;
+      height: 80vh;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .post {
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+      transform: translateY(10px);
+      opacity: 0;
+      animation: slideUp 0.5s forwards;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+    }
+
+    .profile-pic {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .post-content {
+      margin-top: 10px;
+    }
+
+    .post-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .post-actions button {
+      background-color: #4267B2;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .post-actions button:hover {
+      background-color: #365899;
+    }
+  </style>
+</head>
+<body>
+  <div id="newsFeed">
+    <!-- Posts will be dynamically inserted here -->
+  </div>
+
+  <script>
+    const posts = [];  // Empty initially for API integration
+
+    const newsFeed = document.getElementById('newsFeed');
+
+    // Placeholder function to fetch posts from Facebook API (client-side only for testing)
+    async function fetchPostsFromAPI() {
+      try {
+        // Using Facebook Graph API (Replace YOUR_ACCESS_TOKEN with actual access token)
+        const response = await fetch(`https://graph.facebook.com/v17.0/me/feed?access_token=YOUR_ACCESS_TOKEN`);
+        const data = await response.json();
+
+        // Parse and render posts from API response
+        const fetchedPosts = data.data.map(post => ({
+          id: post.id,
+          user: post.from.name,
+          content: post.message || 'No content available.',
+          profilePic: 'https://via.placeholder.com/50', // Replace with actual user profile image URL if available
+          likes: Math.floor(Math.random() * 100),  // Placeholder
+          comments: Math.floor(Math.random() * 50),  // Placeholder
+          shares: Math.floor(Math.random() * 20)  // Placeholder
+        }));
+
+        renderPosts(fetchedPosts);
+      } catch (error) {
+        console.error('Error fetching posts from Facebook API:', error);
+      }
+    }
+
+    // Function to render posts
+    function renderPosts(posts) {
+      posts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+
+        postElement.innerHTML = `
+          <div class="post-header">
+            <img src="${post.profilePic}" class="profile-pic" alt="Profile Picture">
+            <div>
+              <strong>${post.user}</strong>
+            </div>
+          </div>
+          <div class="post-content">
+            <p>${post.content}</p>
+          </div>
+          <div class="post-actions">
+            <button onclick="reactToPost(${post.id})">Like (${post.likes})</button>
+            <button onclick="commentOnPost(${post.id})">Comment (${post.comments})</button>
+            <button onclick="sharePost(${post.id})">Share (${post.shares})</button>
+          </div>
+        `;
+        newsFeed.appendChild(postElement);
+      });
+    }
+
+    // Placeholder functions for actions
+    function reactToPost(id) {
+      alert(`Reacted to post with ID: ${id}`);
+    }
+
+    function commentOnPost(id) {
+      alert(`Commented on post with ID: ${id}`);
+    }
+
+    function sharePost(id) {
+      alert(`Shared post with ID: ${id}`);
+    }
+
+    // Load posts from API when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchPostsFromAPI();  // Fetch and display posts
+    });
+
+    // Infinite scroll simulation - Load more posts when scrolling
+    let loadingMore = false;
+
+    newsFeed.addEventListener('scroll', () => {
+      if (newsFeed.scrollTop + newsFeed.clientHeight >= newsFeed.scrollHeight && !loadingMore) {
+        loadingMore = true;
+        setTimeout(() => {
+          // Simulate loading new posts
+          fetchPostsFromAPI();
+          loadingMore = false;
+        }, 1000); // Simulate loading time
+      }
+    });
+  </script>
+</body>
+  </html>
